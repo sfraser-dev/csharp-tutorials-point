@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace rectangle1
+namespace tutorialsPoint
 {
-    class Rectangle
+    class TPoint
     {
         double length, width;
         public void acceptdetails()
@@ -26,9 +26,9 @@ namespace rectangle1
         }
         public void readinfo()
         {
-            Console.Write("input length: ");
+            Console.Write("Input length of rectangle: ");
             length = Convert.ToDouble(Console.ReadLine());
-            Console.Write("input length: ");
+            Console.Write("Input width of rectangle: ");
             width = Convert.ToDouble(Console.ReadLine());
         }
         public int factorial(int num) // a recursive function
@@ -84,25 +84,25 @@ namespace rectangle1
         {
             // Instansiate a Rectangle
             Console.WriteLine("Rectangle class:");
-            Rectangle rect = new Rectangle();
-            rect.readinfo();
-            rect.display();
+            TPoint TP = new TPoint();
+            TP.readinfo();
+            TP.display();
 
             // A recursive function
             Console.WriteLine("\nRecursive function:");
-            Console.WriteLine("factorial 4: = {0}", rect.factorial(4));
+            Console.WriteLine("factorial 4: = {0}", TP.factorial(4));
 
             // A swap function (swap by reference and swap by output)
             Console.WriteLine("\nSwapping:");
             int a = 100;
             int b = 200;
             Console.WriteLine("Original values: a={0}, b={1}", a, b);
-            rect.swap(a, b);
+            TP.swap(a, b);
             Console.WriteLine("Swap (copy args): a={0}, b={1}", a, b);
-            rect.swapByRef(ref a, ref b);
+            TP.swapByRef(ref a, ref b);
             Console.WriteLine("Swap (by reference): a={0}, b={1}", a, b);
             int summation;
-            rect.swapByOutput(a, b, out b, out a, out summation);
+            TP.swapByOutput(a, b, out b, out a, out summation);
             Console.WriteLine("Swap (by output): a={0}, b={1}, summation={2}", a, b, summation);
 
             // 1D Arrays
@@ -137,8 +137,8 @@ namespace rectangle1
             // Param arrays
             int[] weeArr = { 1, 2, 3 };
             int[] bigArr = new int[] { 1, 2, 3, 2, 1, 100 };
-            Console.WriteLine("(sum = {0})", rect.addElements(weeArr));
-            Console.WriteLine("(sum = {0})", rect.addElements(bigArr));
+            Console.WriteLine("(sum = {0})", TP.addElements(weeArr));
+            Console.WriteLine("(sum = {0})", TP.addElements(bigArr));
 
             // Strings
             Console.WriteLine("\nStrings:");
@@ -171,6 +171,12 @@ namespace rectangle1
             Console.WriteLine("\nEnums:");
             Console.WriteLine("Mon={0}", (int)Days.Mon);
             Console.WriteLine("Fri={0}", (int)Days.Fri);
+
+
+
+
+
+
 
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
