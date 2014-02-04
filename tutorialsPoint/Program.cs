@@ -6,9 +6,39 @@ using System.Text;
 
 namespace tutorialsPoint
 {
+    class MyStaticVariable
+    {
+        public static int counter = 0;
+        public void inc()
+        {
+            counter++;
+        }
+        public int returnCount()
+        {
+            return counter;
+        }
+    }
+
+    class MyStaticFunction
+    {
+        public static int counter = 0;
+        public static void inc()
+        {
+            counter++;
+        }
+        public static int returnCount()
+        {
+            return counter;
+        }
+    }
+
     class TPoint
     {
         double length, width;
+        public TPoint()
+        {
+            Console.WriteLine("TPoint is being constructed");
+        }
         public void acceptdetails()
         {
             length = 4.5;
@@ -73,6 +103,94 @@ namespace tutorialsPoint
                 Console.Write("{0} ", i);
             }
             return sum;
+        }
+    }
+
+    class Shape
+    {
+        public Shape()
+        {
+            Console.WriteLine("Shape constructor");
+        }
+        public Shape(int w, int h)
+        {
+            width = w;
+            height = h;
+            Console.WriteLine("Shape constructor, width={0}, height={1}",width,height);
+        }
+        protected int width;
+        protected int height;
+        protected double widthPrecise;
+        protected double heightPrecise;
+        public void setWidth(int w)
+        {
+            width = w;
+        }
+        public void setHeight(int h)
+        {
+            height = h;
+        }
+        public void setWidth(double w)
+        {
+            widthPrecise = w;
+        }
+        public void setHeight(double h)
+        {
+            heightPrecise = h;
+        }
+    }
+    class Rectangle : Shape
+    {
+        public Rectangle()
+        {
+            Console.WriteLine("Rectangle constructor");
+        }
+        public Rectangle(int w, int h) : base (w,h)
+        {
+            Console.WriteLine("Rectangle constructor, width={0}, height={1}",width,height);
+        }
+        public int getArea()
+        {
+            return (width * height);
+        }
+        public double getAreaPrecise()
+        {
+            return (widthPrecise * heightPrecise);
+        }
+        public static Rectangle operator +(Rectangle a, Rectangle b)
+        {
+            Rectangle r = new Rectangle(a.width + b.width, a.height + b.height);
+            return r;
+        }
+
+    }
+
+    abstract class Animal
+    {
+        public Animal () {
+            Console.WriteLine("Animal constructor");
+        }
+        public abstract void makeNoise();
+    }
+
+    class Horse : Animal
+    {
+        public Horse () {
+            Console.WriteLine("Horse constructor");
+        }
+        public override void makeNoise()
+        {
+            Console.WriteLine("Neigh");
+        }
+    }
+    class Cow : Animal
+    {
+        public Cow () {
+            Console.WriteLine("Cow constructor");
+        }
+        public override void  makeNoise()
+        {
+            Console.WriteLine("Mooo");
         }
     }
 
@@ -172,11 +290,47 @@ namespace tutorialsPoint
             Console.WriteLine("Mon={0}", (int)Days.Mon);
             Console.WriteLine("Fri={0}", (int)Days.Fri);
 
+            // Static vaiables and functions
+            Console.WriteLine("\nStatic:");
+            MyStaticVariable c1 = new MyStaticVariable();
+            MyStaticVariable c2 = new MyStaticVariable();
+            c1.inc();
+            c1.inc();
+            c1.inc(); // c1.inc() and c2.inc() are both incrementing
+            c2.inc(); // the same static variable in class MyStaticVar.
+            c2.inc(); // There is only one copy of this static variable
+            c2.inc();
+            Console.WriteLine("c1 counter={0}", c1.returnCount());
+            Console.WriteLine("c2 counter={0}", c2.returnCount());
+            // Static functions can access static variable without needing to instantiate an object,
+            // the static functions exist even before the object is created.
+            Console.WriteLine("c3 counter={0}", MyStaticFunction.returnCount());
+            MyStaticFunction.inc();
+            MyStaticFunction.inc();
+            Console.WriteLine("c3 counter={0}", MyStaticFunction.returnCount());
 
+            // Inheritance
+            Console.WriteLine("\nInheritance:");
+            Rectangle Rect1 = new Rectangle();
+            Rect1.setWidth(2);
+            Rect1.setHeight(3);
+            Console.WriteLine("Rect1 area = {0}", Rect1.getArea());
+            Rectangle Rect2 = new Rectangle(4,5);
+            Console.WriteLine("Rect2 area = {0}", Rect2.getArea());
 
-
-
-
+            // Polymorphism
+            Console.WriteLine("\nPolymorphism:");
+            Rectangle Rect3 = new Rectangle();
+            Rect3.setWidth(0.5);  // Static compile time polymorphism
+            Rect3.setHeight(4.8); // Overloading functions setWidth and setHeight
+            Console.WriteLine("Rect3 precisie area = {0}",Rect3.getAreaPrecise());
+            Rectangle Rect4 = new Rectangle();  // Static compile time polymorphism
+            Rect4 = Rect1 + Rect2;              // Operator (+) overloading
+            Console.WriteLine("Rect4 area = {0}",Rect4.getArea()); 
+            Animal Daisy = new Cow();   // Dynamic overloading (resolved at run-time, not compile-time)
+            Daisy.makeNoise();          // Daisy and MrEd are both Animals who override the virtual 
+            Animal MrEd = new Horse();  // makeNoise function.
+            MrEd.makeNoise(); 
 
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
