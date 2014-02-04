@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.IO;
 
 namespace tutorialsPoint
 {
@@ -139,6 +141,7 @@ namespace tutorialsPoint
             heightPrecise = h;
         }
     }
+
     class Rectangle : Shape
     {
         public Rectangle()
@@ -165,6 +168,11 @@ namespace tutorialsPoint
 
     }
 
+    public interface AnimalFarm
+    {
+        void proclaimComrade();
+    }
+
     abstract class Animal
     {
         public Animal () {
@@ -173,7 +181,7 @@ namespace tutorialsPoint
         public abstract void makeNoise();
     }
 
-    class Horse : Animal
+    class Horse : Animal, AnimalFarm
     {
         public Horse () {
             Console.WriteLine("Horse constructor");
@@ -182,21 +190,67 @@ namespace tutorialsPoint
         {
             Console.WriteLine("Neigh");
         }
+        public void proclaimComrade()
+        {
+            Console.WriteLine("I will work harder. Napolean is always right");
+        }
     }
-    class Cow : Animal
+    class Sheep : Animal, AnimalFarm
     {
-        public Cow () {
-            Console.WriteLine("Cow constructor");
+        public Sheep () {
+            Console.WriteLine("Sheep constructor");
         }
         public override void  makeNoise()
         {
-            Console.WriteLine("Mooo");
+            Console.WriteLine("Baaaaaa");
+        }
+        public void proclaimComrade() {
+            Console.WriteLine("Four legs good. Two legs bad.");
         }
     }
 
+    class Crocodile : Animal
+    {
+        public Crocodile()
+        {
+            Console.WriteLine("Crocodile constructor");
+        }
+        public override void makeNoise()
+        {
+            Console.WriteLine("Snap snap snap");
+        }
+    }
+    
     class Program
     {
         enum Days { Sun = 0, Mon, Tues, Wed, Thur, Fri, Sat };
+
+        private static void showMatch(string text, string expr)
+        {
+            Console.WriteLine("The expression: " + expr);
+            MatchCollection mc = Regex.Matches(text, expr);
+            foreach (Match m in mc)
+            {
+                Console.WriteLine(m);
+            }
+        }
+
+        public void tryDivide(int num1, int num2)
+        {
+            int result = 0;
+            try
+            {
+                result = num1 / num2;
+            }
+            catch (DivideByZeroException e)
+            {
+                Console.WriteLine("Exception caught: {0}", e);
+            }
+            finally
+            {
+                Console.WriteLine("Result = {0}", result);
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -315,7 +369,7 @@ namespace tutorialsPoint
             Rect1.setWidth(2);
             Rect1.setHeight(3);
             Console.WriteLine("Rect1 area = {0}", Rect1.getArea());
-            Rectangle Rect2 = new Rectangle(4,5);
+            Rectangle Rect2 = new Rectangle(4, 5);
             Console.WriteLine("Rect2 area = {0}", Rect2.getArea());
 
             // Polymorphism
@@ -323,14 +377,101 @@ namespace tutorialsPoint
             Rectangle Rect3 = new Rectangle();
             Rect3.setWidth(0.5);  // Static compile time polymorphism
             Rect3.setHeight(4.8); // Overloading functions setWidth and setHeight
-            Console.WriteLine("Rect3 precisie area = {0}",Rect3.getAreaPrecise());
+            Console.WriteLine("Rect3 precisie area = {0}", Rect3.getAreaPrecise());
             Rectangle Rect4 = new Rectangle();  // Static compile time polymorphism
             Rect4 = Rect1 + Rect2;              // Operator (+) overloading
-            Console.WriteLine("Rect4 area = {0}",Rect4.getArea()); 
-            Animal Daisy = new Cow();   // Dynamic overloading (resolved at run-time, not compile-time)
-            Daisy.makeNoise();          // Daisy and MrEd are both Animals who override the virtual 
-            Animal MrEd = new Horse();  // makeNoise function.
-            MrEd.makeNoise(); 
+            Console.WriteLine("Rect4 area = {0}", Rect4.getArea());
+            Sheep Wooly = new Sheep();   // Dynamic overloading (resolved at run-time, not compile-time)
+            Wooly.makeNoise();           // Wooly and Boxer are both Animals who override the virtual 
+            Horse Boxer = new Horse();   // makeNoise function.
+            Boxer.makeNoise();
+            Crocodile Charlie = new Crocodile();
+            Charlie.makeNoise();
+
+            // Interface
+            Console.WriteLine("\nInterface:");
+            Wooly.proclaimComrade();  // Implement multiple inheritance (MI) via an interface
+            Boxer.proclaimComrade();  // Horses and Sheep are Animals in AnimalFarm
+            // Crocodile is an Animal not in AnimalFarm. 
+            // C#/.NET isn't keen on MI, hence the interface "kludge".
+
+            // Regular expressions
+            Console.WriteLine("\nRegular Expressions:");
+            string str = "A Thousand Splendid Suns";
+            Console.WriteLine("Matching words that start with 'S': ");
+            showMatch(str, @"\bS\S*");
+            str = "make mase and manage to measure it";
+            Console.WriteLine("Matching words that start with 'm' and ends with 'e': ");
+            showMatch(str, @"\bm\S*e\b");
+            string input = "Hello   World    ";
+            string pattern = "\\s+";
+            string replacement = " ";
+            Regex rgx = new Regex(pattern);
+            string result = rgx.Replace(input, replacement);
+            Console.WriteLine("Original string: {0}", input);
+            Console.WriteLine("Replaced string: {0}", result);
+
+            // Exception handeling
+            Console.WriteLine("\nException handeling:");
+            Program p = new Program();
+            p.tryDivide(23, 0);  // Dividing by zero, catch exception
+
+            // File I/O
+            Console.WriteLine("\nFile I/O:");
+            FileStream fs = new FileStream("test.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            try  // Try writing bytes to file
+            {
+                for (int i = 1; i <= 20; i++)
+                {
+                    fs.WriteByte((byte)i);
+                }
+            }
+            catch (IOException e) // Catch IOExceptions
+            {
+                Console.WriteLine(e.Message + "\nCannot write to file.");
+            }
+            fs.Position = 0;
+            try  // Try reading bytes from file
+            {
+                for (int i = 1; i <= 20; i++)
+                {
+                    Console.Write("{0} ", fs.ReadByte());  // Read bytes from file
+                }
+                Console.Write("\n");
+            }
+            catch (IOException e) // Catch IOExceptions
+            {
+                Console.WriteLine(e.Message + "\nCannot read from file.");
+            }
+            finally
+            {
+                fs.Close();
+            }
+            using (StreamWriter sw = new StreamWriter("test.txt", false))   // false = do not append
+            {
+                sw.WriteLine("Some text");
+                sw.WriteLine("Some more text");
+                sw.WriteLine("Even more text");
+                sw.Close();
+            }
+            // Read ALL the text from the file
+            using (StreamReader sr = new StreamReader("test.txt"))
+            {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        Console.WriteLine(line);
+                    }
+            }            
+            // Manipulating the Windows Filesystem using DirectoryInfo
+            DirectoryInfo di = new DirectoryInfo(@"c:\dev");
+            FileInfo[] fi = di.GetFiles();
+            foreach (FileInfo file in fi)
+            {
+                Console.WriteLine("File name: {0}, Size: {1}", file.Name, file.Length);
+            }
+
+
 
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
