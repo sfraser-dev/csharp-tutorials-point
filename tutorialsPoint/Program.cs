@@ -1,10 +1,12 @@
 ﻿// Tutorials Point C# PDF (http://www.tutorialspoint.com/csharp/)
+#define DEBUG_LEV1
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Diagnostics;
 
 namespace tutorialsPoint
 {
@@ -220,10 +222,90 @@ namespace tutorialsPoint
             Console.WriteLine("Snap snap snap");
         }
     }
-    
+
+    class StudentProp
+    {
+        private string name = null;  // Backing store
+        private int? age = null;     // Backing store
+        private double [] moneyCollected = new double[10];
+
+        // Property accessors
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+        public int? Age
+        {
+            get { return age; }
+            set { age = value; }
+        }
+        // Indexer
+        public double this[int number]{
+            get
+            {
+                if (number >= 0 && number < moneyCollected.Length)
+                {
+                    return moneyCollected[number];
+                }
+                else
+                {
+                    return 0.0;
+                }
+            }
+            set{
+                if (number >= 0 && number < moneyCollected.Length){
+                    moneyCollected[number] = value;
+                }
+            }
+        }
+    }
+
+    delegate int NumberChanger(int n); // delegate takes an int and returns an int
+    class TestDelegate
+    {
+        static int num = 10;
+        public static int AddNum(int p)
+        {
+            num += p;
+            return num;
+        }
+        public static int MultNum(int p)
+        {
+            num *= p;
+            return num;
+        }
+        // Property accessor
+        public static int getNum(){
+            return num;
+        }
+    }
+
     class Program
     {
         enum Days { Sun = 0, Mon, Tues, Wed, Thur, Fri, Sat };
+
+        // Delegate code
+        static FileStream fs;
+        static StreamWriter sw;
+        public delegate void delPrintString(string s); // delegate takes a string and returns void
+        public static void writeToScreen(string s)     // method takes a string and returns void
+        {                                              // (matches delegate delPrintString)
+            Console.WriteLine("Print delegate: {0}", s);
+        }
+        public static void writeToFile(string s)       // method takes a string and returns void
+        {                                              // (matches delegate delPrintString)
+            fs = new FileStream("delegatePrintString.txt", FileMode.Create, FileAccess.Write);
+            sw = new StreamWriter(fs);
+            sw.WriteLine(s);
+            sw.Flush();
+            sw.Close();
+            fs.Close();
+        }
+        public static void sendString(delPrintString dps) // method takes a delPrintString delegate
+        {
+            dps("Hello, World");
+        } // Delegate code: End
 
         private static void showMatch(string text, string expr)
         {
@@ -471,11 +553,106 @@ namespace tutorialsPoint
                 Console.WriteLine("File name: {0}, Size: {1}", file.Name, file.Length);
             }
 
+            // Attributes
+            Console.WriteLine("\nAttributes:");      // Associate types with metadata in .NET.
+            AttClass.NewMessage("In main function"); // This metadata can be attached to your code.
+            attFunction1();
+
+            // Reflection
+            // http://www.dotnetperls.com/reflection
+            // (http://msdn.microsoft.com/en-us/library/orm-9780596521066-01-20.aspx)
+            // For runtime and looking at assemblies. An assembly is a chunk of precompiled
+            // (.dll or .exe) that can be executed by the .NET runtime environment. 
+            // Reflection is used for late binding (occuring at runtime).
+            // Reflection is just a way of investigating objects during run-time. 
+            // You shouldn't use it if you don't need to do just that.
+            // Refection uses the type system. 
+            // Every compiled c# program is encoded into a relational database,
+            // this is called metadata (a database is repository of
+            // data, a relational database organises data into tables).
+            // Reflection acts upon the metadata in the relational database.
+
+            // Properties
+            // Fields should be private data in a class.
+            // Properties provide a level of abstraction by allowing you to change the fields
+            // via get() and set() accessors while not affecting the external way they are accessed.
+            // Class members include fields, properties, members and events.
+            Console.WriteLine("\nProperties:");
+            StudentProp SP = new StudentProp();
+            SP.Name = "Alice";
+            SP.Age = 8;
+            Console.WriteLine("{0} is {1} years old", SP.Name, SP.Age);
+
+            // Indexers
+            // An indexer provides an array-like syntax to a type (eg: an object).
+            // Declaration and behaviour of an indexer is similar to a property (using
+            // get() and set() accessors). 
+            // Indexers often access a backing array (a private or protected array) and accept an int.
+            Console.WriteLine("\nIndexers:");
+            SP[0] = 1.1;
+            SP[1] = 2.2;
+            SP[2] = 3.3;
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine("money collected = {0}", SP[i]);
+            }
+
+            // Delegates
+            // Delegates are types (reference types, instantiate like class).
+            // Delegates are similar to pointers in C/C++.
+            // Delegates hold the reference to a method.
+            // The reference can be changes at runtime.
+            // Delegates especially used in events and call-back functions.
+            // num = 10 initially
+            Console.WriteLine("\nDelegates:");
+            NumberChanger nc1 = new NumberChanger(TestDelegate.AddNum);
+            NumberChanger nc2 = new NumberChanger(TestDelegate.MultNum);
+            nc1(3); // 10+3=13
+            Console.WriteLine("nc1: Value of num = {0}", TestDelegate.getNum());
+            nc2(2); // 13*2=26
+            Console.WriteLine("nc2: Value of num = {0}", TestDelegate.getNum());
+            // Multicasting delegates, use + and - to create an invocation list of methods
+            NumberChanger nc = nc1; // nc = nc1 = 26
+            Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
+            nc = nc1 + nc2 + nc1 + nc1 - nc2 + nc1 + nc2; // create invocation list = amaa-mam = aaaam
+            Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
+            nc(3); // 26+3=29, 29+3=32, 32+3=35, 35+3=38, 38*3=114
+            Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
+            // Use of Delegate
+            delPrintString dps1 = new delPrintString(writeToScreen); // Instantiate delegate 1 (references screen method)
+            delPrintString dps2 = new delPrintString(writeToFile);   // Instantiate delegate 2 (references file method)
+            sendString(dps1); // send string to reference 1 (delegate 1, screen)
+            sendString(dps2); // send string to reference 2 (delegate 2, file)
+
 
 
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
         }   // Main function
+
+        static void attFunction1()
+        {
+            AttClass.NewMessage("In attFunction 1");
+            attFunction2();
+        }
+        static void attFunction2()
+        {
+            //AttClass.OldMessage("In attFunction 2");
+            AttClass.NewMessage("In attFunction 2");
+        }
     }
 
+    public class AttClass
+    {
+        [Conditional("DEBUG_LEV1")]
+        public static void NewMessage(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+        [Obsolete("Don't use OldMessage, use NewMessage", true)]
+        public static void OldMessage(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+    }
 }
