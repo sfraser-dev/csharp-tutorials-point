@@ -10,6 +10,7 @@ using System.Diagnostics;
 
 namespace tutorialsPoint
 {
+    // Simple static variable
     class MyStaticVariable
     {
         public static int counter = 0;
@@ -22,7 +23,7 @@ namespace tutorialsPoint
             return counter;
         }
     }
-
+    // Simple static function
     class MyStaticFunction
     {
         public static int counter = 0;
@@ -36,6 +37,7 @@ namespace tutorialsPoint
         }
     }
 
+    // Simple Tutorials Point class
     class TPoint
     {
         double length, width;
@@ -110,6 +112,7 @@ namespace tutorialsPoint
         }
     }
 
+    // Base class
     class Shape
     {
         public Shape()
@@ -143,7 +146,7 @@ namespace tutorialsPoint
             heightPrecise = h;
         }
     }
-
+    // Child class
     class Rectangle : Shape
     {
         public Rectangle()
@@ -170,11 +173,11 @@ namespace tutorialsPoint
 
     }
 
+    // Abstract class, inheritance and multiple inheritance using interfaces
     public interface AnimalFarm
     {
         void proclaimComrade();
     }
-
     abstract class Animal
     {
         public Animal () {
@@ -182,7 +185,6 @@ namespace tutorialsPoint
         }
         public abstract void makeNoise();
     }
-
     class Horse : Animal, AnimalFarm
     {
         public Horse () {
@@ -210,7 +212,6 @@ namespace tutorialsPoint
             Console.WriteLine("Four legs good. Two legs bad.");
         }
     }
-
     class Crocodile : Animal
     {
         public Crocodile()
@@ -223,6 +224,22 @@ namespace tutorialsPoint
         }
     }
 
+    // Attribute class
+    public class AttClass
+    {
+        [Conditional("DEBUG_LEV1")]
+        public static void NewMessage(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+        [Obsolete("Don't use OldMessage, use NewMessage", true)]
+        public static void OldMessage(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+    }
+
+    // Properties and Indexer
     class StudentProp
     {
         private string name = null;  // Backing store
@@ -261,7 +278,9 @@ namespace tutorialsPoint
         }
     }
 
+    // Delegate type
     delegate int NumberChanger(int n); // delegate takes an int and returns an int
+    // Delegate class
     class TestDelegate
     {
         static int num = 10;
@@ -284,6 +303,18 @@ namespace tutorialsPoint
     class Program
     {
         enum Days { Sun = 0, Mon, Tues, Wed, Thur, Fri, Sat };
+
+        // Attribute code
+        static void attFunction1()
+        {
+            AttClass.NewMessage("In attFunction 1");
+            attFunction2();
+        }
+        static void attFunction2()
+        {
+            //AttClass.OldMessage("In attFunction 2");
+            AttClass.NewMessage("In attFunction 2");
+        }
 
         // Delegate code
         static FileStream fs;
@@ -611,10 +642,12 @@ namespace tutorialsPoint
             Console.WriteLine("nc1: Value of num = {0}", TestDelegate.getNum());
             nc2(2); // 13*2=26
             Console.WriteLine("nc2: Value of num = {0}", TestDelegate.getNum());
-            // Multicasting delegates, use + and - to create an invocation list of methods
+            // Multicasting delegates, use + and - to create an invocation list of methods which'll all be called
+            // Multicasting delegates mean they can point (reference) more than one method at a time
             NumberChanger nc = nc1; // nc = nc1 = 26
             Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
-            nc = nc1 + nc2 + nc1 + nc1 - nc2 + nc1 + nc2; // create invocation list = amaa-mam = aaaam
+            // Create invocation list = amaa-mam = aaaam, not sure about the negatives on this list
+            nc = nc1 + nc2 + nc1 + nc1 - nc2 + nc1 + nc2; 
             Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
             nc(3); // 26+3=29, 29+3=32, 32+3=35, 35+3=38, 38*3=114
             Console.WriteLine("nc: Value of num = {0}", TestDelegate.getNum());
@@ -624,35 +657,59 @@ namespace tutorialsPoint
             sendString(dps1); // send string to reference 1 (delegate 1, screen)
             sendString(dps2); // send string to reference 2 (delegate 2, file)
 
-
+            // Events
+            // Events are actions like key press, click, move mouse etc.
+            // Publishers will publish the event to subscribers who subscribe to the event.
+            // Applications need to respond to events as they occur (interupts).
+            // Events are used for inter-process communication.
+            // Events are used with delegates (delegates used to specify the EventHandler type).
+            Console.WriteLine("\nEvents:");
+            // http://www.akadia.com/services/dotnet_delegates_and_events.html
+            // There are 3 steps in using delegates (i) declare, (ii) instantiate, (iii) invoke
+            EventPub ep = new EventPub(); // Publishing class; delegate and event declared here
+            EventPub.DDelegate del1 = new EventPub.DDelegate(funConsoleWrite);  // instantiate delegate pointing to function "funConsoleWrite"
+            EventPub.DDelegate del2 = new EventPub.DDelegate(funFileWriteFake); // instantiate delegate pointing to function "funFileWriteFake"
+            ep.EEvent += del1; // subscribe reference to "funConsoleWrite" to event.
+            ep.EEvent += del2; // subscribe reference to "funFileWriteFake" to event.
+            ep.process();      // Invoke the event
+            
+            
 
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
         }   // Main function
 
-        static void attFunction1()
-        {
-            AttClass.NewMessage("In attFunction 1");
-            attFunction2();
+        // Functions that'll subscribe to event in EventPub
+        public static void funConsoleWrite(string s)  // matches DDelegate in EventPub
+        {                                             // DDelegate will reference (point to) this function 
+            Console.WriteLine("Console writing: {0}",s);
         }
-        static void attFunction2()
-        {
-            //AttClass.OldMessage("In attFunction 2");
-            AttClass.NewMessage("In attFunction 2");
+        public static void funFileWriteFake(string s) // matches DDelegate in EventPub
+        {                                             // DDelegate will reference (point to) this function 
+            Console.WriteLine("Fake file writing: {0}", s);
         }
     }
 
-    public class AttClass
+    // Event publisher class
+    public class EventPub  
     {
-        [Conditional("DEBUG_LEV1")]
-        public static void NewMessage(string msg)
+        private string theStr;
+        public delegate void DDelegate(string str); // Delegate (pointer/reference to a method)
+        public event DDelegate EEvent;              // Event handled by delegate (ie: click mouse -> call function)
+        
+        protected virtual void OnEEvent(string s)
         {
-            Console.WriteLine(msg);
+            if (EEvent != null)
+            {
+                EEvent(s); // Same return and arguments as the delegate
+                           // ie: have all delegates subscribing to this event now implement this event
+            }
         }
-        [Obsolete("Don't use OldMessage, use NewMessage", true)]
-        public static void OldMessage(string msg)
+        
+        public void process()
         {
-            Console.WriteLine(msg);
+            OnEEvent("process 1"); // funConsoleWrite and funFileWriteFake will write "process 1"
+            OnEEvent("process 2"); // funConsoleWrite and funFileWriteFake will write "process 2"
         }
     }
 }
