@@ -667,8 +667,8 @@ namespace tutorialsPoint
             // http://www.akadia.com/services/dotnet_delegates_and_events.html
             // There are 3 steps in using delegates (i) declare, (ii) instantiate, (iii) invoke
             EventPub ep = new EventPub(); // Publishing class; delegate and event declared here
-            EventPub.DDelegate del1 = new EventPub.DDelegate(funConsoleWrite);  // instantiate delegate pointing to function "funConsoleWrite"
-            EventPub.DDelegate del2 = new EventPub.DDelegate(funFileWriteFake); // instantiate delegate pointing to function "funFileWriteFake"
+            EventPub.DDelegate del1 = new EventPub.DDelegate(EventPub.funConsoleWrite);  // instantiate delegate pointing to function "funConsoleWrite"
+            EventPub.DDelegate del2 = new EventPub.DDelegate(EventPub.funFileWriteFake); // instantiate delegate pointing to function "funFileWriteFake"
             ep.EEvent += del1; // subscribe reference to "funConsoleWrite" to event.
             ep.EEvent += del2; // subscribe reference to "funFileWriteFake" to event.
             ep.process();      // Invoke the event
@@ -678,16 +678,6 @@ namespace tutorialsPoint
             Console.WriteLine("\n\n... hit any key to exit");
             Console.ReadKey();
         }   // Main function
-
-        // Functions that'll subscribe to event in EventPub
-        public static void funConsoleWrite(string s)  // matches DDelegate in EventPub
-        {                                             // DDelegate will reference (point to) this function 
-            Console.WriteLine("Console writing: {0}",s);
-        }
-        public static void funFileWriteFake(string s) // matches DDelegate in EventPub
-        {                                             // DDelegate will reference (point to) this function 
-            Console.WriteLine("Fake file writing: {0}", s);
-        }
     }
 
     // Event publisher class
@@ -710,6 +700,16 @@ namespace tutorialsPoint
         {
             OnEEvent("process 1"); // funConsoleWrite and funFileWriteFake will write "process 1"
             OnEEvent("process 2"); // funConsoleWrite and funFileWriteFake will write "process 2"
+        }
+
+        // Functions that'll subscribe to event in Main
+        public static void funConsoleWrite(string s)  // matches DDelegate in EventPub
+        {                                             // DDelegate will reference (point to) this function 
+            Console.WriteLine("Console writing: {0}", s);
+        }
+        public static void funFileWriteFake(string s) // matches DDelegate in EventPub
+        {                                             // DDelegate will reference (point to) this function 
+            Console.WriteLine("Fake file writing: {0}", s);
         }
     }
 }
