@@ -1,5 +1,5 @@
 ﻿// Tutorials Point C# PDF (http://www.tutorialspoint.com/csharp/)
-#define DEBUG_LEV1
+#define DEBUG_LEV1  // Attribute testing
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Diagnostics;
+using System.Threading;
 
 namespace tutorialsPoint
 {
@@ -80,7 +81,8 @@ namespace tutorialsPoint
                 return result;
             }
         }
-        public void swap(int x, int y)
+        public 
+            void swap(int x, int y)
         {
             int temp;
             temp = x;
@@ -300,6 +302,38 @@ namespace tutorialsPoint
         }
     }
 
+    // Simple generic class
+    public class MyGenericArray<T>
+    {
+        private T[] array;
+        public MyGenericArray(int size)
+        {
+            array = new T[size + 1];
+        }
+        public T getItem(int i)
+        {
+            return array[i];
+        }
+        public void setItem(int i, T val)
+        {
+            array[i] = val;
+        }
+    }
+
+    public class notSafeClass
+    {
+        public unsafe void usePointer()
+        {
+            int var = 20;
+            int* p = &var;
+            Console.WriteLine("var={0}", var);
+            Console.WriteLine("address of var={0}", (int)&var);
+            Console.WriteLine("address of var={0}", (int)p);
+            *p += 10;
+            Console.WriteLine("Change value via pointer: var={0}", var);
+        }
+    }
+
     class Program
     {
         enum Days { Sun = 0, Mon, Tues, Wed, Thur, Fri, Sat };
@@ -363,6 +397,13 @@ namespace tutorialsPoint
             {
                 Console.WriteLine("Result = {0}", result);
             }
+        }
+
+        public static unsafe void swapUnsafe(int* a, int* b)
+        {
+            int tmp = *a;
+            *a = *b;
+            *b = tmp;
         }
 
         static void Main(string[] args)
@@ -673,11 +714,130 @@ namespace tutorialsPoint
             ep.EEvent += del2; // subscribe reference to "funFileWriteFake" to event.
             ep.process();      // Invoke the event
             
-            
+            // Collections
+            // C# has built in collection classes for data storage and retrieval such as arraylist,
+            // hashtable, sortedlist, stack, queue and bitarray.
 
-            Console.WriteLine("\n\n... hit any key to exit");
+            // Generics
+            // Akin to C++ templates. Probably still best to write class / method / delegate first 
+            // without generics (get it working) and then edit it to add generics.
+            Console.WriteLine("\nGenerics:");
+            MyGenericArray<int> mgai = new MyGenericArray<int>(3);
+            MyGenericArray<char> mgac = new MyGenericArray<char>(2);
+            mgai.setItem(0, 100);
+            mgai.setItem(1, 101);
+            mgai.setItem(2, 102);
+            mgac.setItem(0, 'h');
+            mgac.setItem(1, 'i');
+            for (int i = 0; i < 3; i++)
+            {
+                Console.WriteLine("Int array[{0}]={1}", i, mgai.getItem(i));
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                Console.WriteLine("Char array[{0}]={1}", i, mgac.getItem(i));
+            }
+
+            // Anonymous methods
+            // Anonymous methods allow the creation of delegates without having to write 
+            // a separate method. Anonymous methods are inline unnamed methods. 
+            Console.WriteLine("\nAnonymous method:");
+            // Instantiate delegate referencing (pointing to) inline code via an anonymous method
+            MathOp2 addEm = delegate(int aa, int bb) { return aa + bb; }; 
+            Console.WriteLine("Result from (inline) anonymous method = {0}", addEm(2, 3)); 
+
+            // Unsafe code
+            // Can use pointers. Build with /unsafe switch (Project properties, Build, Allow unsafe code)
+            Console.WriteLine("\nUnsafe code:");
+            notSafeClass nsc = new notSafeClass();
+            nsc.usePointer();
+            unsafe
+            {
+                int var0 = 5;
+                Console.WriteLine("var0 before: {0}", var0);
+                int* ptr = &var0;
+                *ptr *= 100;
+                Console.WriteLine("var0 after: {0}", var0);
+            }
+            unsafe
+            {
+                int var1 = 5;
+                int var2 = 7;
+                Console.WriteLine("var1={0}, var2={1}", var1, var2);
+                Console.WriteLine("... unsafe swapping ...");
+                swapUnsafe(&var1, &var2);
+                Console.WriteLine("var1={0}, var2={1}", var1, var2);
+            }
+
+            // Multi-threading
+            // http://www.codeproject.com/Articles/1083/Multithreaded-Programming-Using-C
+            Console.WriteLine("\nMulti-threading:");
+            // Create two thread objects and tell them which methods to run initially.
+            Thread tid1 = new Thread(new ThreadStart(MyThread.Thread1));
+            Thread tid2 = new Thread(new ThreadStart(MyThread.Thread2));
+            // Start the two threads
+            tid1.Start();
+            Thread.Sleep(700);
+            tid2.Start();
+
+            // Lambda
+            // A Lambda function is just a function that doesn't have an explicit name.
+            // Lambdas added to C# because delegates (references/pointers to functions) can be cumbersome.
+            // Lambda expressions are simply an even shorter-handed way to write anonymous functions, so
+            // functions can be passed around easily like in scripting languages (usually very simple one line functions).
+            // http://cplus.about.com/od/learnc/ss/Linq-c-Tutorial.htm
+            Console.WriteLine("\nLambda:");
+            // Anonymous type (the type of "me" is unknown (foreach uses anonymous type var as well)
+            var me = new { Name = "David", Age = 52 }; 
+            Console.WriteLine("Name={0}, Age={1}", me.Name, me.Age);
+            // Anonymous method (using MathOp1 again)
+            MathOp1 squareItDelegate = delegate(int aa) { return aa * aa; };
+            Console.WriteLine("squareItDelegate(5)={0}", squareItDelegate(5));
+            // Lambda function mathing delegate MathOp1
+            MathOp1 squareItLambda = (x) => x * x; // Don't need the brackets: x => x * x; 
+            Console.WriteLine("squareItLambda(5)={0}", squareItLambda(5));
+            // Lambda function mathing delegate MathOp2
+            MathOp2 multEmLambda = (x, y) => x * y;
+            Console.WriteLine("multEmLambda(5,3)={0}", multEmLambda(5,3));
+
+            // LINQ
+            // http://codefoster.com/linqlambda
+            // LINQ (Language INtegrated Query) exists because we do a lot with lists of data (in many forms).
+            // LINQ allows you to select items out of a list and transform them.
+            // The list can be a list of objects, records from SQL database or XML.
+            // Lambda expressions can be used to select the items from the list.
+
+            // ...
+            // ...
+            // ...
+            // ...
+            Console.WriteLine("\n\nEnd of Main() ... hit any key to exit");
             Console.ReadKey();
         }   // Main function
+    }
+
+    delegate int MathOp1(int a);        // Simplier MathOp delegate for lambda (takes one argument)
+    delegate int MathOp2(int a, int b); // For inline anonymous method (takes two arguments)
+
+    // Multi-threading
+    public class MyThread
+    {
+        public static void Thread1()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine("Thread1 {0}", i);
+                Thread.Sleep(200);
+            }
+        }
+        public static void Thread2()
+        {
+            for (int i = 100; i < 110; i++)
+            {
+                Console.WriteLine("Thread2 {0}", i);
+                Thread.Sleep(100);
+            }
+        }
     }
 
     // Event publisher class
